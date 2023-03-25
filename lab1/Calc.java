@@ -1,5 +1,4 @@
 import java.util.*;
-import java.lang.*;
 import java.io.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -8,6 +7,8 @@ import java.awt.image.BufferedImage;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.Timer;
+import javax.xml.crypto.Data;
 
 class Calc {
     public enum State {
@@ -19,20 +20,33 @@ class Calc {
     }
     public static void main (String[] args) throws java.lang.Exception {
         JFrame frame = new JFrame();
-        JPanel panel = new JPanel();
 
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 600, 900));
+        JPanel container = new JPanel();
+        container.setLayout(new BoxLayout(container, BoxLayout.X_AXIS));
+
+        PrismCanvas canvas = new PrismCanvas(5);
+        canvas.setBorder(BorderFactory.createEmptyBorder(20, 20, 800, 800));
+
+        JPanel panel = new JPanel();
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 800, 250));
         panel.setLayout(new GridLayout(0, 1));
 
         JTextField field = new JTextField(10);
-        field.addActionListener((event) -> {
-            System.out.println("ehh");
+        field.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println(field.getText());
+            }
         });
+        panel.add(new JLabel("Pole:"));
         panel.add(field, BorderLayout.CENTER);
 
-        frame.add(panel, BorderLayout.CENTER);
+        container.add(panel);
+        container.add(canvas);
+
+        frame.add(container);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setTitle("App");
+        frame.setTitle("Kalkulator, nie dla biedaków");
         frame.pack();
         frame.setVisible(true);
 
@@ -84,8 +98,113 @@ class Calc {
     } 
 }
 
-class GUI extends JFrame {
+class PrismCanvas extends JPanel {
+    public PrismCanvas(int n) {
+        Timer timer = new Timer(16, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                repaint();
+            }
+        });
+        timer.start();
 
+        points = new double[3 * (2 * n + 2)];
+        indices = new int[(n * 2) * 3 * 2];
+
+        points[3 * (2 * n + 0) + 0] = 0.0;
+        points[3 * (2 * n + 0) + 1] = -1.0;
+        points[3 * (2 * n + 0) + 2] = 0.0;
+        points[3 * (2 * n + 1) + 0] = 0.0;
+        points[3 * (2 * n + 1) + 1] = 1.0;
+        points[3 * (2 * n + 1) + 2] = 0.0;
+
+        for(int i = 0; i < n; i++) {
+            double theta = (double) i * Math.PI * 2.0 / (double)n;
+            double radius = 1.0;
+            points[3 * i + 0] = radius * Math.cos(theta);
+            points[3 * i + 1] = -1.0f;
+            points[3 * i + 2] = radius * Math.sin(theta);
+
+            points[3 * (i + n) + 0] = radius * Math.cos(theta);
+            points[3 * (i + n) + 1] = 1.0f;
+            points[3 * (i + n) + 2] = radius * Math.sin(theta);
+
+            // bottom
+            indices[i * 3 + 0] = i;
+            indices[i * 3 + 1] = 2 * n;
+            indices[i * 3 + 2] = (i + 1) % n;
+
+            // top
+            indices[(i + n) * 3 + 0] = (i + n);
+            indices[(i + n) * 3 + 1] = 2 * n + 1;
+            indices[(i + n) * 3 + 2] = (((i + 1) % n + n));
+
+            // side
+            indices[(i + 2 * n) * 3 + 0] = i;
+            indices[(i + 2 * n) * 3 + 1] = (i + 1) % n;
+            indices[(i + 2 * n) * 3 + 2] = i + n;
+
+            indices[(i + 3 * n) * 3 + 0] = (i + 1) % n;
+            indices[(i + 3 * n) * 3 + 1] = ((i + 1) % n + n) ;
+            indices[(i + 3 * n) * 3 + 2] = (i + n);
+        }
+    }
+
+    @Override
+    public void paint(Graphics g) {
+      Graphics2D g2d = (Graphics2D) g;
+      int w = g2d.getClipBounds().width;
+      int h = g2d.getClipBounds().height;
+      time += 0.01677777;
+
+      g2d.clearRect(0, 0, w, h);
+
+      g2d.setColor(Color.ORANGE);
+      dist = (float) (2.2f + Math.cos(time * 5.2) / 2. + 1.0);
+
+      for(int i = 0; i < indices.length / 3; i++) {
+        double[][] p = new double[3][2];
+        for(int j = 0; j < 3; j++) {
+            double[] p0 =  toViewport(
+                points[indices[i * 3 + j] * 3 + 0],
+                points[indices[i * 3 + j] * 3 + 1],
+                points[indices[i * 3 + j] * 3 + 2] + dist
+            );
+            p0 = toScreen(p0[0], p0[1], w, h);
+
+            g2d.fillArc((int)p0[0], (int)p0[1], 4, 4, 0, 360);
+            p[j] = p0;
+        }
+        g2d.drawLine((int)p[0][0], (int)p[0][1], (int)p[1][0], (int)p[1][1]);
+        g2d.drawLine((int)p[1][0], (int)p[1][1], (int)p[2][0], (int)p[2][1]);
+        g2d.drawLine((int)p[2][0], (int)p[2][1], (int)p[0][0], (int)p[0][1]);
+      }
+    }
+
+    private double[] toViewport(double x, double y, double z) {
+        double[] result = new double[2];
+
+        result[0] = x / z;
+        result[1] = y / z;
+
+        return result;
+    }
+
+    private double[] toScreen(double x, double y, int w, int h) {
+        double[] screenPoint = new double[2];
+        screenPoint[0] = x + 1.0f;
+        screenPoint[1] = -y + 1.0f;
+        screenPoint[0] *= w * 0.5f;
+        screenPoint[1] *= h * 0.5f;
+        return screenPoint;
+    }
+
+    private double[] points;
+    private int[] indices;
+
+    private float dist = 5.0f;
+    private double theta = 0.2f;
+    private double time = 0.0;
 }
 
 interface Printable {
