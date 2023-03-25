@@ -3,6 +3,8 @@ import java.io.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
 
 import javax.imageio.ImageIO;
@@ -19,6 +21,7 @@ class Calc {
         Prism,
     }
     public static void main (String[] args) throws java.lang.Exception {
+        consoleMenu();
         JFrame frame = new JFrame();
 
         JPanel container = new JPanel();
@@ -31,6 +34,11 @@ class Calc {
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 800, 250));
         panel.setLayout(new GridLayout(0, 1));
 
+        JComboBox selectFigureCombo = new JComboBox<>();
+        selectFigureCombo.addItem("Kwadrat");
+        selectFigureCombo.addItem("Koło");
+        selectFigureCombo.addItem("Trójkąt");
+        selectFigureCombo.addItem("Graniastosłup prawidłowy");
         JTextField field = new JTextField(10);
         field.addActionListener(new ActionListener() {
             @Override
@@ -38,7 +46,8 @@ class Calc {
                 System.out.println(field.getText());
             }
         });
-        panel.add(new JLabel("Pole:"));
+        panel.add(new JLabel("Figura:"));
+        panel.add(selectFigureCombo, BorderLayout.CENTER);
         panel.add(field, BorderLayout.CENTER);
 
         container.add(panel);
@@ -49,37 +58,33 @@ class Calc {
         frame.setTitle("Kalkulator, nie dla biedaków");
         frame.pack();
         frame.setVisible(true);
+    }
 
-        ArrayList<Figure> figures = new ArrayList<Figure>();
-        figures.add(new Circle(4.0));
-        figures.add(new Square(4.0));
-        figures.add(new Triangle(3, 4, 5));
-        figures.add(new Triangle(3, 4, 5));
-
-        for(int i = 0; i < figures.size(); i++) {
-            System.out.println(figures.get(i).calculatePerimeter());
-            System.out.println(figures.get(i).calculateArea());
-
-            Printable print = (Printable)figures.get(i);
+    private static void consoleMenu() {
+        boolean exit = false;
+        for(;;) {
+            State state = processInput();
+            if(state == State.Exit) {
+                return;
+            }
+            Figure figure = processData(state);
+            if(figure == null) {
+                continue;
+            }
+            Printable print = (Printable)figure;
             print.print();
+            
         }
-
-        // for(;;) {
-        //     State state = processInput();
-        //     // processData(state)
-        //     switch(state) {
-        //         case Exit:
-        //             System.out.println("Bye!");
-        //             return;
-        //         case Triangle:
-        //             System.out.println("Triangle");
-        //     }
-        // }
     }
 
     private static State processInput() {
-        clearScreen();
+        System.out.println("Triangle [0]");
+        System.out.println("Circle   [1]");
+        System.out.println("Square   [2]");
+        System.out.println("Prism    [3]");
+        System.out.println("Exit     [any other value]");
         System.out.println("Select Figure:");
+
         Scanner scanner = new Scanner(System.in);
         int choice = scanner.nextInt();
 
@@ -92,11 +97,75 @@ class Calc {
         return State.Exit;
     }
 
+    private static Figure processData(State state) {
+            Scanner scanner = new Scanner(System.in);
+            switch(state) {
+                case Triangle:
+                    System.out.println("Triangle: a, b, c:");
+                    double a = scanner.nextDouble();
+                    double b = scanner.nextDouble();
+                    double c = scanner.nextDouble();
+
+                    try {
+                        Triangle figure = new Triangle(a, b, c);
+                        return figure;
+                    } catch(Exception e) {
+                        System.out.println("Invalid input:" + e.getMessage());
+                        return null;
+                    }
+                case Circle:
+                    System.out.println("Circle: r:");
+                    double radius = scanner.nextDouble();
+
+                    try {
+                        Circle figure = new Circle(radius);
+                        return figure;
+                    } catch(Exception e) {
+                        System.out.println("Invalid input:" + e.getMessage());
+                        return null;
+                    }
+                case Square: 
+                    System.out.println("Square: a:");
+                    double side = scanner.nextDouble();
+
+                    try {
+                        Square figure = new Square(side);
+                        return figure;
+                    } catch(Exception e) {
+                        System.out.println("Invalid input:" + e.getMessage());
+                        return null;
+                    }
+                case Prism:
+                    System.out.println("Prism: side len, height, number of sides:");
+                    double prismSide = scanner.nextDouble();
+                    double height = scanner.nextDouble();
+                    int n = scanner.nextInt();
+
+                    try {
+                        Prism figure = new Prism(prismSide, height, n);
+                        return figure;
+                    } catch(Exception e) {
+                        System.out.println("Invalid input:" + e.getMessage());
+                        return null;
+                    }
+                default: 
+                    System.out.println("Invalid state exiting");
+                    return null;
+            }
+    }
+
     public static void clearScreen() {  
         System.out.print("\033[H\033[2J");  
         System.out.flush();  
     } 
 }
+
+// class ComboHandler implements ItemListener {
+//     @Override
+//     public void itemStateChanged(ItemEvent event) {
+
+//     }
+// }
 
 class PrismCanvas extends JPanel {
     public PrismCanvas(int n) {
@@ -302,22 +371,30 @@ class Prism extends Figure implements Printable {
         this.n = n;
     } 
 
-    public double calculateArea() {
-        return n * (height * a + Math.cos(Math.PI / (double)n) * a * a);
-    }
-
     public double calculatePerimeter() {
         return n * (height + 2 * a);
     }
 
+    public double calculateArea() {
+        double base = calculateBaseArea();
+        return 2 * base + n * a * height;
+    }
+
+    public double calculateBaseArea() {
+        return n * 0.25 * a * a * Math.tan(Math.PI / (double)n);
+    }
+
+
     public double calculateVolume() {
-        return height * Math.cos(Math.PI / (double)n) * a * a * 0.5 * n;
+        double base = calculateBaseArea();
+        return height * base;
     }
 
     public void print() {
-        System.out.println("3d[], a: " + a + ", height:" + height + ", n:" + n);
+        System.out.println("3d[], a: " + a + ", height: " + height + ", n: " + n);
         System.out.println("Area: " + calculateArea());
         System.out.println("Perimeter: " + calculatePerimeter());
+        System.out.println("Volume: " + calculateVolume());
     }
 
     double a;
