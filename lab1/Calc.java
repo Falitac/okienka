@@ -55,7 +55,7 @@ class Calc {
 
         frame.add(container);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setTitle("Kalkulator, nie dla biedaków");
+        frame.setTitle("Kalkulator");
         frame.pack();
         frame.setVisible(true);
     }
@@ -73,6 +73,11 @@ class Calc {
             }
             Printable print = (Printable)figure;
             print.print();
+            System.out.format("Area:      %.3f\n", figure.calculateArea());
+            System.out.format("Perimeter: %.3f\n", figure.calculatePerimeter());
+            if(figure instanceof Prism) {
+                System.out.format("Volume: %.3f\n", ((Prism)figure).calculateVolume());
+            }
             
         }
     }
@@ -305,8 +310,6 @@ class Triangle extends Figure implements Printable {
 
     public void print() {
         System.out.println("/\\, a:" + a + ", b:" + b + ", c:" + c);
-        System.out.println("Area: " + calculateArea());
-        System.out.println("Perimeter: " + calculatePerimeter());
     }
 
     private double a;
@@ -332,8 +335,6 @@ class Square extends Figure implements Printable {
 
     public void print() {
         System.out.println("[], a: " + a);
-        System.out.println("Area: " + calculateArea());
-        System.out.println("Perimeter: " + calculatePerimeter());
     }
     private double a;
 }
@@ -355,8 +356,6 @@ class Circle extends Figure implements Printable {
 
     public void print() {
         System.out.println("O, radius: " + r);
-        System.out.println("Area: " + calculateArea());
-        System.out.println("Perimeter: " + calculatePerimeter());
     }
     private double r;
 }
@@ -381,9 +380,8 @@ class Prism extends Figure implements Printable {
     }
 
     public double calculateBaseArea() {
-        return n * 0.25 * a * a * Math.tan(Math.PI / (double)n);
+        return n * 0.25 * a * a / Math.tan(Math.PI / (double)n);
     }
-
 
     public double calculateVolume() {
         double base = calculateBaseArea();
@@ -392,9 +390,6 @@ class Prism extends Figure implements Printable {
 
     public void print() {
         System.out.println("3d[], a: " + a + ", height: " + height + ", n: " + n);
-        System.out.println("Area: " + calculateArea());
-        System.out.println("Perimeter: " + calculatePerimeter());
-        System.out.println("Volume: " + calculateVolume());
     }
 
     double a;
