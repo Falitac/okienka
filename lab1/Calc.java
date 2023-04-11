@@ -295,6 +295,9 @@ class Triangle extends Figure implements Printable {
         if(a <= 0 || b < 0 || c <= 0) {
             throw new Exception("Dimensions are dumb");
         }
+        if(Math.abs(a - b) >= c || c >= a + b) {
+            throw new Exception("Triangle doesn't exist");
+        }
         this.a = a;
         this.b = b;
         this.c = c;
@@ -362,8 +365,8 @@ class Circle extends Figure implements Printable {
 
 class Prism extends Figure implements Printable {
     public Prism(double a, double height, int n) throws Exception {
-        if(a < 0 || height < 0.0 || n < 0) {
-            throw new Exception("Jiotaro");
+        if(a < 0 || height < 0.0 || n <= 2) {
+            throw new Exception("Dumb dimensions");
         }
         this.a = a;
         this.height = height;
