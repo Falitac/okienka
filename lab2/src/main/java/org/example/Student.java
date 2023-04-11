@@ -1,6 +1,5 @@
 package org.example;
 
-import java.util.Comparator;
 
 public class Student implements Comparable<String> {
     String name;
@@ -10,7 +9,6 @@ public class Student implements Comparable<String> {
     int birthDate;
     double points;
     private int id;
-
     static int indexer = 0;
 
     public int getId() {
@@ -24,6 +22,8 @@ public class Student implements Comparable<String> {
         this.birthDate = birthDate;
         this.points = points;
         this.id = indexer;
+
+        this.email = (name.substring(0, 1) + surname).toLowerCase() + "@student.agh.edu.pl";
         indexer++;
     }
 
@@ -31,8 +31,9 @@ public class Student implements Comparable<String> {
         System.out.println("Student info:");
         System.out.println("Imię: " + name);
         System.out.println("Nazwisko: " + surname);
-        System.out.println("Rok urodzenia:" + birthDate);
-        System.out.println("Stan:" + condition.toString());
+        System.out.println("Rok urodzenia: " + birthDate);
+        System.out.println("Stan: " + condition.toString());
+        System.out.format("Punkty: %.2f\n", points);
         System.out.println("E-Mail: " + email);
     }
     public String getName() {
@@ -80,11 +81,20 @@ public class Student implements Comparable<String> {
     }
 
     public void addPoints(double points) {
+        if(points <= 0) {
+            return;
+        }
         this.points += points;
     }
 
     public void removePoints(double points) {
-        this.points += points;
+        if(points >= 0) {
+            return;
+        }
+        this.points -= points;
+        if(this.points < 0) {
+            this.points = 0.0;
+        }
     }
 
     @Override

@@ -5,25 +5,25 @@ import java.util.*;
 public class Class {
     private String groupName;
     ArrayList<Student> studentList;
-    final private int maxCount = 64;
+    static final public int maxCount = 64;
     private double percentage = 1.0;
 
     public Class(String groupName, double percentage) throws Exception {
         this.groupName = groupName;
         this.studentList = new ArrayList<>();
-        if(percentage < 0.0 || percentage > 1.0) {
+        if(percentage <= 0.0 || percentage > 1.0) {
             throw new Exception("Invalid capacity");
         }
         this.percentage = percentage;
     }
 
     public boolean addStudent(Student student) {
-        if(studentList.size() >= maxCount * percentage) {
+        if(studentList.size() >= (int)(maxCount * percentage)) {
             System.err.println("Limit studentow przekroczony");
             return false;
         }
         if(studentList.contains(student)) {
-            System.out.println("Juz istnieje ten student");
+            System.out.println("Juz istnieje taki student");
             return false;
         }
         studentList.add(student);
@@ -38,7 +38,10 @@ public class Class {
         return true;
     }
     public Student getStudent(Student student) {
-        studentList.remove(student);
+        if(student.getPoints() <= 0.0) {
+            System.out.println("Student dismiss");
+            studentList.remove(student);
+        }
         return student;
     }
     public boolean changeCondition(Student student, StudentCondition condition) {
@@ -125,4 +128,12 @@ public class Class {
     public double getPercentage() {
         return percentage;
     }
+    public String getGroupName() {
+        return groupName;
+    }
+
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
+    }
+
 }
