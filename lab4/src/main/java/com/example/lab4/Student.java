@@ -1,4 +1,4 @@
-package org.example;
+package com.example.lab4;
 
 
 public class Student implements Comparable<String> {

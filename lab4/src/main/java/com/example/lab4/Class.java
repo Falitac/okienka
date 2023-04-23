@@ -1,4 +1,4 @@
-package org.example;
+package com.example.lab4;
 
 import java.util.*;
 
@@ -139,5 +139,8 @@ public class Class {
 
     public void removeById(int id) {
         studentList.remove(id);
+    }
+    public Student getById(int id) {
+        return studentList.get(id);
     }
 }

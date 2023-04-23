@@ -1,4 +1,4 @@
-package org.example;
+package com.example.lab4;
 
 public enum StudentCondition {
     Refurb {

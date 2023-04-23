@@ -1,12 +1,12 @@
-package org.example;
+package com.example.lab4;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 public class ClassContainer {
-    private Map<String, Class> groups = new HashMap<>();
-    private ArrayList<String> indexing = new ArrayList();
+    public Map<String, Class> groups = new HashMap<>();
+    public ArrayList<String> indexing = new ArrayList();
 
     public boolean addClass(String className, double maxCapacity) {
         if(groups.containsKey(className)) {
@@ -60,6 +60,8 @@ public class ClassContainer {
     public Class getClass(String name) {
         return groups.get(name);
     }
+
+    public boolean exists(String name) { return getClass(name) != null; }
 
     public int getCount() { return groups.size(); }
 
