@@ -4,9 +4,10 @@ import java.util.*;
 
 public class Class {
     private String groupName;
-    ArrayList<Student> studentList;
+    List<Student> studentList;
     static final public int maxCount = 64;
     private double percentage = 1.0;
+    private double rating;
 
     public Class(String groupName, double percentage) throws Exception {
         this.groupName = groupName;
@@ -15,6 +16,7 @@ public class Class {
             throw new Exception("Invalid capacity");
         }
         this.percentage = percentage;
+        this.rating = 0.0;
     }
 
     public boolean addStudent(Student student) {
@@ -22,7 +24,7 @@ public class Class {
             System.err.println("Limit studentow przekroczony");
             return false;
         }
-        if(studentList.contains(student)) {
+        if(search(student.surname) != null) {
             System.out.println("Juz istnieje taki student");
             return false;
         }
@@ -94,7 +96,7 @@ public class Class {
         }
     }
 
-    public ArrayList<Student> sortByNames() {
+    public List<Student> sortByNames() {
         Collections.sort(studentList, new Comparator<Student>() {
             @Override
             public int compare(Student student, Student t1) {
@@ -103,7 +105,7 @@ public class Class {
         });
         return studentList;
     }
-    public ArrayList<Student> sortByPoints() {
+    public List<Student> sortByPoints() {
         Collections.sort(studentList, new Comparator<Student>() {
             @Override
             public int compare(Student student, Student t1) {
@@ -137,10 +139,28 @@ public class Class {
         this.groupName = groupName;
     }
 
-    public void removeById(int id) {
-        studentList.remove(id);
+    public boolean removeById(int id) {
+        for(var i = 0; i < studentList.size(); i++) {
+            if(studentList.get(i).getId() == id) {
+                studentList.remove(i);
+                return  true;
+            }
+        }
+        return false;
     }
     public Student getById(int id) {
         return studentList.get(id);
+    }
+
+    public double getRating() {
+        return rating;
+    }
+
+    public boolean setRating(double rating) {
+        if(rating < 0) {
+            return false;
+        }
+        this.rating = rating;
+        return true;
     }
 }

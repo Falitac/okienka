@@ -28,6 +28,14 @@ public class ClassContainer {
         indexing.remove(className);
         return true;
     }
+    public boolean removeClass(int id) {
+        var group = getClassById(id);
+        if(group == null) {
+            return false;
+        }
+        removeClass(group.getGroupName());
+        return true;
+    }
 
     public ArrayList<Class> findEmpty() {
         var result = new ArrayList<Class>();
@@ -66,6 +74,11 @@ public class ClassContainer {
     public int getCount() { return groups.size(); }
 
     public Class getClassById(int id) {
-        return getClass(indexing.get(id));
+        try {
+            var index = indexing.get(id);
+            return getClass(index);
+        } catch (Exception e) {
+            return  null;
+        }
     }
 }

@@ -108,4 +108,8 @@ public class Student implements Comparable<String> {
     public void setCondition(StudentCondition condition) {
         this.condition = condition;
     }
+
+    static void resetIndexing() {
+        indexer = 0;
+    }
 }
