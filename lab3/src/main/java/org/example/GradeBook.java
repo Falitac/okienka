@@ -24,6 +24,7 @@ public class GradeBook extends JFrame {
         classContainer.addClass("Metalurgia", 0.25);
         classContainer.addClass("Bidaznastwo", 0.25);
         classContainer.addClass("Bidaznastwo", 0.25);
+        classContainer.addClass("Inna", 0.25);
 
         classContainer.getClass("Informatyka").addStudent(new Student("Jan", "Klacz", StudentCondition.Sick, 2000, 20.0));
         classContainer.getClass("Informatyka").addStudent(new Student("Andrzej", "Kowalski", StudentCondition.Absent, 2000, 20.0));
@@ -72,7 +73,11 @@ public class GradeBook extends JFrame {
             @Override
             public void mousePressed(MouseEvent e) {
                 var id = classTable.getSelectedRow();
+                if(id == -1) {
+                    return;
+                }
                 var group = classContainer.getClassById(id);
+                System.out.println("SELECTTED:" + id);
                 studentTable.setModel(new StudentTable(group.searchPartial("")));
 
                 var column = studentTable.getColumnModel().getColumn(2);
@@ -100,9 +105,9 @@ public class GradeBook extends JFrame {
         container.add(buttons, constraints);
 
 
-        var buttonRemove = new JButton("Usuń");
-        buttonRemove.setSize(80, 30);
-        buttonRemove.addActionListener(e -> {
+        var buttonRemoveStudent = new JButton("Usuń studenta");
+        buttonRemoveStudent.setSize(80, 30);
+        buttonRemoveStudent.addActionListener(e -> {
             var classId = classTable.getSelectedRow();
             var group = classContainer.getClassById(classId);
             if(group == null) {
@@ -117,7 +122,57 @@ public class GradeBook extends JFrame {
             studentTable.repaint();
             studentTable.updateUI();
         });
-        buttons.add(buttonRemove);
+        buttons.add(buttonRemoveStudent);
+
+        var buttonAddGroup = new JButton("Dodaj grupę");
+        buttonAddGroup.setSize(80, 30);
+        buttonAddGroup.addActionListener(e -> {
+            JTextField className = new JTextField();
+            JTextField capacity = new JTextField();
+            Object[] message = {
+                    "Nazwa klasy:", className,
+                    "Pojemność:", capacity
+            };
+            var result = JOptionPane.showConfirmDialog(null, message, "Add class", JOptionPane.OK_CANCEL_OPTION);
+            if(result == JOptionPane.OK_OPTION) {
+                var cName = className.getText();
+                double cCapacity = 0.0;
+                try {
+                    cCapacity = Double.valueOf(capacity.getText());
+                } catch (Exception exception) {
+                    JOptionPane.showMessageDialog(null, "Użyj przedziału (0.0, 1.0>", "Błąd", JOptionPane.WARNING_MESSAGE, null);
+                    return;
+                }
+                System.out.println(cName + cCapacity);
+                if(!classContainer.addClass(cName, cCapacity)) {
+                    JOptionPane.showMessageDialog(null, "Nie udało sie dodać klasy", "Błąd", JOptionPane.WARNING_MESSAGE, null);
+                }
+                ((AbstractTableModel)classTable.getModel()).fireTableDataChanged();
+            }
+        });
+        buttons.add(buttonAddGroup);
+
+        var buttonRemoveGroup = new JButton("Usuń grupę");
+        buttonRemoveGroup.setSize(80, 30);
+        buttonRemoveGroup.addActionListener(e -> {
+            var classId = classTable.getSelectedRow();
+            var group = classContainer.getClassById(classId);
+            if(group == null) {
+                return;
+            }
+            classContainer.removeClass(group.getGroupName());
+            studentTable.setModel(new StudentTable(group.searchPartial("")));
+            ((AbstractTableModel)classTable.getModel()).fireTableDataChanged();
+
+            classTable.updateUI();
+            classTable.repaint();
+            classTable.updateUI();
+
+            studentTable.updateUI();
+            studentTable.repaint();
+            studentTable.updateUI();
+        });
+        buttons.add(buttonRemoveGroup);
 
         var buttonSortByName = new JButton("Posortuj");
         buttonSortByName.setSize(80, 30);
@@ -238,7 +293,7 @@ class StudentTable extends AbstractTableModel {
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
         if(rowIndex == students.size()) {
             System.out.println("I am here");
-//            studentClass.addStudent(new Student("<Imie>", "<Nazwisko>", StudentCondition.Absent, 1900, 20.0));
+            students.add(new Student("<Imie>", "<Nazwisko>", StudentCondition.Absent, 1900, 20.0));
             return;
         }
         var student = students.get(rowIndex);

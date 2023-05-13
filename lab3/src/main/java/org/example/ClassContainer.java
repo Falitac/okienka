@@ -5,10 +5,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ClassContainer {
-    private Map<String, Class> groups = new HashMap<>();
-    private ArrayList<String> indexing = new ArrayList();
+    public Map<String, Class> groups = new HashMap<>();
+    public ArrayList<String> indexing = new ArrayList();
 
     public boolean addClass(String className, double maxCapacity) {
+        if(className.equals("")) {
+            return false;
+        }
         if(groups.containsKey(className)) {
             System.out.println("There is already such a class");
             return false;
